@@ -1,7 +1,7 @@
 <template>
 	<div id="index">
 		<div class="left_map">
-			<baidu-map></baidu-map>
+			<baidu-map :data='map_data'></baidu-map>
 		</div>
 		<div class="right_tab">
 			<v-tabs
@@ -49,6 +49,12 @@ export default {
 	data(){
 		return{
 			cameraList:[],
+			map_data:{
+				center:'',
+				zoom:18,
+				camera_list:[],
+				map_position:{}
+			},
 			tab: null,
 			item: 1,
 			tab_list: [],
@@ -63,10 +69,13 @@ export default {
 	methods:{
 		getData() {
 			index_data().then((res)=>{
-				console.log(res)
 				let data = res.data
 				let that = this;
-		
+				
+				that.map_data.center = data.map_center
+				that.map_data.zoom = data.map_zoom
+
+
 				//tab 数据转换
 				that.items = []
 				let tab_title = [{name:'车牌',data:'plate'},{name:'人脸',data:'person'}]
@@ -76,9 +85,7 @@ export default {
 					obj.content = data[tab_title[i].data]
 					that.tab_list.push(obj)
 				}
-				
-				console.log(that.tab_list)
-				
+							
 				// 存在记录的所有摄像头坐标获取
 				that.get_camera_list(data)
 
@@ -86,31 +93,19 @@ export default {
 		},
 		get_camera_list(data) {
 			let that = this
+			let camera_list = []
 
-			// that.cameraList.push(data.plate[0].camera)
-			// // 存在记录的所有摄像头坐标获取
-			// for (let i = 0; i < data.plate.length; i++) {
-			// 	data.plate.forEach(item=>{
-			// 		if(item.camera.psi != that.cameraList[i].psi){
-			// 			that.cameraList.push(data.plate[i].camera)
-			// 		}
-			// 	})
-			// 	// if (that.cameraList.indexOf(data.plate[i].camera.psi) < 0) {
-			// 	// 	that.cameraList.push(data.plate[i].camera)
-			// 	// }
-			// }
-
-
-			// for (let i in data.person) {
-			// 	if (that.cameraList.indexOf(data.person[i].position) < 0) {
-			// 		that.cameraList.push(data.person[i].position)
-			// 	}
-			// }
-
-			console.log(that.cameraList)
+			// 存在记录的所有摄像头坐标获取
+			for (let i in data.plate) {
+				camera_list.push(data.plate[i].camera)
+			}
+			for (let i in data.person) {
+					camera_list.push(data.person[i].camera)
+			}
+			that.map_data.camera_list = that.fuc.deWeight(camera_list)
 		},
 		itemClick(data) {
-			console.log(data)
+			this.map_data.map_position = data.camera
 		}
 	}
 };

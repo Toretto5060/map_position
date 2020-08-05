@@ -33,6 +33,18 @@ Vue.prototype.fuc = {
       }
     }
     return obj
+  },
+  deWeight(arr) {   // 冒泡排序法数组对象去重
+    for (var i = 0; i < arr.length - 1; i++) {
+        for (var j = i + 1; j < arr.length; j++) {
+            if (arr[i].name == arr[j].name) {
+                arr.splice(j, 1);
+                //因为数组长度减小1，所以直接 j++ 会漏掉一个元素，所以要 j--
+                j--;
+            }
+        }
+    }
+    return arr;
   }
 }
 

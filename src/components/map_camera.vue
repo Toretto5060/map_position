@@ -1,11 +1,20 @@
+<!--
+data:{
+	center:'',   // 地图中心点
+	zoom:0,			// 缩放倍数
+	camera_list:[], // 摄像头分布数据 [{name:''   //摄像头名称  ,psi:''  // 经纬度}]
+	map_position:{}  // 当前标记摄像头  {name:'',psi:''  同上}
+},
+-->
 <template>
 	<div id="map_camer">
 		<baidu-map class="bm-view" :center="center" :zoom="zoom" @ready="handler" :scroll-wheel-zoom="true" v-if="viewShow">
-			<div  v-for="(item,index)  in cameraList" :key="index">
-				<bm-marker @click="is_click(index)" :position="fuc.crdFormation(item.psi)" animation="BMAP_ANIMATION_DROP" :icon="{url:icon.url,size:{width:icon.size[0],height:icon.size[1]}}"></bm-marker>
+			<div  v-if="positionList">
+				<div  v-for="(item,index)  in (data.camera_list ? data.camera_list : [])" :key="index">
+					<bm-marker @click="is_click(index)" :position="crdFormation(item.psi)" animation="BMAP_ANIMATION_DROP" :icon="{url:icon.url,size:{width:icon.size[0],height:icon.size[1]}}"></bm-marker>
+				</div>
 			</div>
-			
-			<bm-marker :position="fuc.crdFormation(this_psi)"  animation="BMAP_ANIMATION_DROP" v-if="psiShow"></bm-marker>
+			<bm-marker :position="crdFormation(this_psi)"  animation="BMAP_ANIMATION_DROP" v-if="psiShow"></bm-marker>
 		</baidu-map>
 	</div>
 </template>
@@ -13,10 +22,12 @@
 <script>
 export default {
 	name: "map_camer",
+	props:['data'],
 	data(){
 		return{
 			viewShow:true,
 			psiShow:false,
+			positionList:true,
 			this_psi:'',
 			center: {lng: 121.481977, lat: 31.235682},
 			zoom: 11,
@@ -24,38 +35,23 @@ export default {
 				url:require('../assets/camer.png'),
 				size:[32,32],
 			},
-			cameraList:[
-				{
-					psi:'121.504997,30.960305',
-					name:'摄像头1'
-				},{
-					psi:'121.503923,30.960478',
-					name:'摄像头'
-				},{
-					psi:'121.506358,30.961192',
-					name:'摄像头3'
-				},{
-					psi:'121.502109,30.961078',
-					name:'摄像头4'
-				},{
-					psi:'121.506345,30.962812',
-					name:'摄像头5'
-				},
-				{
-					psi:'121.504192,30.961617',
-					name:'摄像头6'
-				},{
-					psi:'121.506638,30.961495',
-					name:'摄像头7'
-				}
-			],
+			cameraList:[],
 			timerOut:null
 		}
 	},
 	watch:{
+		"data.map_position"() {
+			this.this_psi = this.data.map_position.psi
+		},
 		"this_psi"(){
-			if (this.this_psi == "") {
+			if (!this.this_psi || this.this_psi == "") {
 				this.psiShow = false
+			} else {
+				this.psiShow = false
+				clearTimeout(this.timerOut)
+				this.timerOut = setTimeout(()=>{
+					this.psiShow = true
+				},1)
 			}
 		}
 	},
@@ -72,18 +68,31 @@ export default {
 	},
 	methods:{
 		is_click(index) {
-			let that = this
-			clearTimeout(that.timerOut)
-			that.psiShow = false
-			that.this_psi = this.cameraList[index].psi
-			that.timerOut = setTimeout(()=>{
-				that.psiShow = true
-			},30)
+			
 		},
 		handler ({BMap, map}) {
-			this.center.lng = 121.504192
-			this.center.lat = 30.961617
-			this.zoom = 19
+			if (this.data.zoom) {
+				this.zoom = this.data.zoom
+			}
+			if(this.data.center){
+				this.center = this.crdFormation(this.data.center)
+			}
+		},
+		crdFormation(psi) {
+			let arr = psi.split(',')
+			let obj = {}
+			if (arr.length > 1) {
+				obj = {
+					lng:arr[0],
+					lat:arr[1]
+				}
+			} else {
+				obj = {
+					lng:0,
+					lat:0
+				}
+			}
+			return obj
 		},
 		
 	}
