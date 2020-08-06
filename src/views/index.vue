@@ -53,7 +53,8 @@ export default {
 				center:'',
 				zoom:18,
 				camera_list:[],
-				map_position:{}
+				map_position:{},
+				timeDate: new Date()
 			},
 			tab: null,
 			item: 1,
@@ -74,7 +75,6 @@ export default {
 				
 				that.map_data.center = data.map_center
 				that.map_data.zoom = data.map_zoom
-
 
 				//tab 数据转换
 				that.items = []
@@ -106,6 +106,7 @@ export default {
 		},
 		itemClick(data) {
 			this.map_data.map_position = data.camera
+			this.map_data.timeDate = new Date()
 		}
 	}
 };

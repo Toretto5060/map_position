@@ -3,7 +3,8 @@ data:{
 	center:'',   // 地图中心点
 	zoom:0,			// 缩放倍数
 	camera_list:[], // 摄像头分布数据 [{name:''   //摄像头名称  ,psi:''  // 经纬度}]
-	map_position:{}  // 当前标记摄像头  {name:'',psi:''  同上}
+	map_position:{}  // 当前标记摄像头  {name:'',psi:''  同上},
+	timeDate:new Data()  // 当前时间
 },
 -->
 <template>
@@ -40,8 +41,12 @@ export default {
 		}
 	},
 	watch:{
-		"data.map_position"() {
-			this.this_psi = this.data.map_position.psi
+		"data.timeDate"() {
+			this.this_psi = ""
+			clearTimeout(this.timerOut)
+			this.timerOut = setTimeout(()=>{
+				this.this_psi = this.data.map_position.psi
+			},1)
 		},
 		"this_psi"(){
 			if (!this.this_psi || this.this_psi == "") {
