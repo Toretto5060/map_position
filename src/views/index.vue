@@ -8,6 +8,7 @@
 				v-model="tab"
 				fixed-tabs
 				center-active
+
 			>
 				<v-tab
 					v-for="item in tab_list"
@@ -53,7 +54,7 @@ export default {
 				center:'',
 				zoom:18,
 				camera_list:[],
-				map_position:{},
+				position_data:{},
 				timeDate: new Date()
 			},
 			tab: null,
@@ -86,9 +87,8 @@ export default {
 					that.tab_list.push(obj)
 				}
 							
-				// 存在记录的所有摄像头坐标获取
+				//存在记录的所有摄像头坐标获取
 				that.get_camera_list(data)
-
 			})
 		},
 		get_camera_list(data) {
@@ -102,10 +102,11 @@ export default {
 			for (let i in data.person) {
 					camera_list.push(data.person[i].camera)
 			}
-			that.map_data.camera_list = that.fuc.deWeight(camera_list)
+			
+			that.map_data.camera_list =  that.fuc.deWeight(camera_list)
 		},
 		itemClick(data) {
-			this.map_data.map_position = data.camera
+			this.map_data.position_data = data
 			this.map_data.timeDate = new Date()
 		}
 	}

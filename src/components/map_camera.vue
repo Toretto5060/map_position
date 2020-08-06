@@ -3,19 +3,28 @@ data:{
 	center:'',   // 地图中心点
 	zoom:0,			// 缩放倍数
 	camera_list:[], // 摄像头分布数据 [{name:''   //摄像头名称  ,psi:''  // 经纬度}]
-	map_position:{}  // 当前标记摄像头  {name:'',psi:''  同上},
+	position_data:{}  // 当前标记信息组  {name:'',psi:''  同上},
 	timeDate:new Data()  // 当前时间
 },
 -->
 <template>
 	<div id="map_camer">
-		<baidu-map class="bm-view" :center="center" :zoom="zoom" @ready="handler" :scroll-wheel-zoom="true" v-if="viewShow">
+		<baidu-map class="bm-view" :center="center" :zoom="zoom" @ready="handler"   v-if="viewShow" :map-click="false" :double-click-zoom="false" :pinch-to-zoom="false" :dragging="true">
 			<div  v-if="positionList">
 				<div  v-for="(item,index)  in (data.camera_list ? data.camera_list : [])" :key="index">
-					<bm-marker @click="is_click(index)" :position="crdFormation(item.psi)" animation="BMAP_ANIMATION_DROP" :icon="{url:icon.url,size:{width:icon.size[0],height:icon.size[1]}}"></bm-marker>
+					<bm-marker @click="is_click(item)" :position="crdFormation(item.psi)" animation="BMAP_ANIMATION_DROP" :icon="{url:icon.url,size:{width:icon.size[0],height:icon.size[1]}}"></bm-marker>
 				</div>
 			</div>
-			<bm-marker :position="crdFormation(this_psi)"  animation="BMAP_ANIMATION_DROP" v-if="psiShow"></bm-marker>
+			<bm-marker @click="this_psi_click(data.position_data)" :position="crdFormation(this_psi)"  animation="BMAP_ANIMATION_DROP" v-if="psiShow"></bm-marker>
+
+			<bm-info-window :position="crdFormation(camera_psi)" :title="windowTitle" :show="windowShow" @close="infoWindowClose" @open="infoWindowOpen" :autoPan="true">
+				<div class="cont">
+					<div class="btn_list">
+						<button v-if="(this.camera_psi == this.this_psi)">回看</button>
+						<button>直播</button>
+					</div>
+				</div>
+			</bm-info-window>
 		</baidu-map>
 	</div>
 </template>
@@ -26,10 +35,15 @@ export default {
 	props:['data'],
 	data(){
 		return{
+			map:null,
+			BMap:null,
+			windowTitle:'',
+			windowShow:false,
 			viewShow:true,
 			psiShow:false,
 			positionList:true,
 			this_psi:'',
+			camera_psi:'',
 			center: {lng: 121.481977, lat: 31.235682},
 			zoom: 11,
 			icon:{
@@ -37,7 +51,10 @@ export default {
 				size:[32,32],
 			},
 			cameraList:[],
-			timerOut:null
+			timerOut:null,
+			clientWidth:0,
+			clientHeight:0
+
 		}
 	},
 	watch:{
@@ -45,7 +62,7 @@ export default {
 			this.this_psi = ""
 			clearTimeout(this.timerOut)
 			this.timerOut = setTimeout(()=>{
-				this.this_psi = this.data.map_position.psi
+				this.this_psi = this.data.position_data.camera.psi
 			},1)
 		},
 		"this_psi"(){
@@ -53,35 +70,73 @@ export default {
 				this.psiShow = false
 			} else {
 				this.psiShow = false
+				this.windowShow = false
 				clearTimeout(this.timerOut)
 				this.timerOut = setTimeout(()=>{
 					this.psiShow = true
+					// this.setSourceCenter()
 				},1)
+
 			}
 		}
 	},
 	mounted(){
+		let w = document.body.clientWidth
+		let h = document.body.clientHeight
 		window.addEventListener('resize',()=>{
 			let that = this
-			that.viewShow = false
-			that.psiShow = false
-			clearTimeout(this.timerOut)
-			this.timerOut = setTimeout(()=>{
-				that.viewShow = true
-			},1)
+			that.clientWidth = document.body.clientWidth
+			that.clientHeight = document.body.clientHeight
+
+			// that.psiShow = false
+			// that.viewShow = false
+			// clearTimeout(this.timerOut)
+			// this.timerOut = setTimeout(()=>{
+			// 	that.viewShow = true
+			// },1)
 		})
 	},
 	methods:{
-		is_click(index) {
-			
+		infoWindowClose(e) {
+			this.windowShow = false;
+			this.setSourceCenter()
+		},
+		infoWindowOpen(e) {
+			this.windowShow = true
+		},
+		is_click(item,index) {
+			this.camera_psi = item.psi
+			if (this.camera_psi != this.this_psi) {
+				this.windowTitle = item.name
+				this.infoWindowOpen()
+			} else {
+				this.infoWindowClose()
+			}
+		},
+		this_psi_click(data) {
+			this.camera_psi = data.camera.psi
+			this.windowTitle = data.camera.name
+			this.infoWindowOpen()
 		},
 		handler ({BMap, map}) {
+			this.map = map
+			this.BMap = BMap
 			if (this.data.zoom) {
 				this.zoom = this.data.zoom
 			}
 			if(this.data.center){
 				this.center = this.crdFormation(this.data.center)
 			}
+		},
+		setSourceCenter() {
+			clearTimeout(this.timerOut)
+			this.timerOut = setTimeout(()=>{
+				if (!this.windowShow) {
+					console.log(9999)
+					const point = new this.BMap.Point(121.504192,30.961617)
+					this.map.panTo(point)
+				}
+			},1)
 		},
 		crdFormation(psi) {
 			let arr = psi.split(',')
@@ -113,6 +168,46 @@ export default {
 		width: 100%;
 		height: 100%;
 	}
+	.cont{
+		height:100%px;
+		.btn_list {
+			display: flex; 
+			justify-content: center; 
+			flex-direction: column;
+			height:100%;
+			margin-top:10px;
+			button {
+				margin: 5px;
+				display: inline-block;
+				border-radius: 3px;
+				outline:none;
+				box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.5), 0px 1px 2px rgba(0, 0, 0, 0.15);
+				background-color: #eeeeee;
+				background: linear-gradient(top, #fbfbfb, #e1e1e1);
+				display: inline-block;
+				vertical-align: middle;
+				zoom: 1;
+				border: 1px solid #d4d4d4;
+				height: 32px;
+				line-height: 32px;
+				padding: 0px 25.6px;
+				font-weight: 300;
+				font-size: 14px;
+				color: #666666;
+				text-shadow: 0 1px 1px white;
+				text-decoration: none;
+				text-align: center;
+			}
+
+			button:hover,button:focus {
+				background-color: red;
+				background: linear-gradient(top, #ffffff, #dcdcdc);
+			}
+		}
+	}
+	
+
+	
 }
 </style>
 
