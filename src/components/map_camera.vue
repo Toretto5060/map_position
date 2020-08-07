@@ -74,7 +74,7 @@ export default {
 				clearTimeout(this.timerOut)
 				this.timerOut = setTimeout(()=>{
 					this.psiShow = true
-					// this.setSourceCenter()
+					this.setSourceCenter()
 				},1)
 
 			}
@@ -132,8 +132,7 @@ export default {
 			clearTimeout(this.timerOut)
 			this.timerOut = setTimeout(()=>{
 				if (!this.windowShow) {
-					console.log(9999)
-					const point = new this.BMap.Point(121.504192,30.961617)
+					const point = new this.BMap.Point(this.center.lng,this.center.lat) 
 					this.map.panTo(point)
 				}
 			},1)

@@ -118,6 +118,9 @@ export default {
 	#index {
 		width:100%;
 		height:100%;
+		position: absolute;
+		top: 0;
+		right: 0;
 		.left_map {
 			width: 80%;
 			height: 100%;
