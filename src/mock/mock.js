@@ -19,41 +19,32 @@ const userData = () => {
 }
 
 const map_data = () => {
-  let data = {
-    map_center:'121.504192,30.961617',
-    map_zoom:18,
-    plate:[],
-    person:[]
-  }
-  let psi = [
-    {name:"摄像头1",psi:"121.505515,30.963195"},
-    {name:"摄像头2",psi:"121.503584,30.963032"},
-    {name:"摄像头3",psi:"121.50212,30.962575"},
-    {name:"摄像头4",psi:"121.502362,30.961282"},
-    {name:"摄像头5",psi:"121.502614,30.960377"},
-    {name:"摄像头6",psi:"121.503332,30.960446"},
-    {name:"摄像头7",psi:"121.503656,30.960206"},
-    {name:"摄像头8",psi:"121.504258,30.962428"},
-    {name:"摄像头9",psi:"121.504231,30.961158"},
-    {name:"摄像头10",psi:"121.504886,30.960942"},
-    {name:"摄像头11",psi:"121.506018,30.961368"},
-    {name:"摄像头12",psi:"121.506018,30.961368"},
-    {name:"摄像头13",psi:"121.504997,30.960305"},
-    {name:"摄像头14",psi:"121.502109,30.961078"},
-    {name:"摄像头15",psi:"121.506469,30.960822"},
-    {name:"摄像头16",psi:"121.506018,30.962552"},
-    {name:"摄像头17",psi:"121.506661,30.961971"}
+  let psi = [ {
+			"ID":	0,
+			"DeviceName":	"东门摄像头",
+      "DeviceAddress":	"新民港路888号","Location":"121.476075,30.992932","CameraType":0,"DeviceAddress":'平阳路1'
+		}, {
+			"ID":	1,
+			"DeviceName":	"西门摄像头",
+			"DeviceAddress":	"新民港路188号","Location":"121.477036,30.995386","CameraType":1,"DeviceAddress":'平阳路2'
+		}, {
+			"ID":	2,
+			"DeviceName":	"南门摄像头",
+			"DeviceAddress":	"新民港路288号","Location":"121.480971,30.99643","CameraType":1,"DeviceAddress":'平阳路3'
+		}, {
+			"ID":	3,
+			"DeviceName":	"北门摄像头",
+			"DeviceAddress":	"新民港路388号","Location":"121.478537,30.993497","CameraType":0,"DeviceAddress":'平阳路4'
+		}
   ]
 
-  for (let i = 0; i < 10; i++) {
-    let user = {
-      'id': i,
-      'plate':"沪"+ Random.character('ABCDEF') + Mock.mock('@string("number", 5)'),
-      'camera': psi[Random.integer(0, 16)],
-    }
-
-    data.plate.push(user)
+  let data = {
+    map_center:'121.47815,30.994207',
+    map_zoom:18,
+    data:psi
   }
+
+
   return data
 }
 

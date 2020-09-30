@@ -5,7 +5,11 @@ import store from "./store";
 import axios from "./api/resouce";
 
 import BaiduMap from 'vue-baidu-map'
-import vuetify from './plugins/vuetify';
+// import vuetify from './plugins/vuetify';
+import ElementUI from 'element-ui';
+import 'element-ui/lib/theme-chalk/index.css';
+Vue.use(ElementUI);
+
 
 Vue.use(BaiduMap, {
   // ak 是在百度地图开发者平台申请的密钥 详见 http://lbsyun.baidu.com/apiconsole/key */
@@ -45,6 +49,21 @@ Vue.prototype.fuc = {
         }
     }
     return arr;
+  },
+  get_date() {
+    let obj = {}
+    obj.Y = new Date().getFullYear();
+    obj.M = new Date().getMonth() + 1;
+    obj.D = new Date().getDate();
+    obj.h = new Date().getHours();
+    obj.m = new Date().getMinutes();
+    obj.s = new Date().getSeconds();
+
+    let mydate=new Date();
+    let myddy=mydate.getDay();//获取存储当前日期
+    let weekday=["日","一","二","三","四","五","六"];
+    obj.week = weekday[myddy]
+    return obj;
   }
 }
 
@@ -52,6 +71,5 @@ new Vue({
   router,
   store,
   axios,
-  vuetify,
   render: h => h(App)
 }).$mount("#app");

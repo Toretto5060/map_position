@@ -12,16 +12,16 @@ data:{
 		<baidu-map class="bm-view" :center="center" :zoom="zoom" @ready="handler"   v-if="viewShow" :map-click="false" :double-click-zoom="false" :pinch-to-zoom="false" :dragging="true">
 			<div  v-if="positionList">
 				<div  v-for="(item,index)  in (data.camera_list ? data.camera_list : [])" :key="index">
-					<bm-marker @click="is_click(item)" :position="crdFormation(item.psi)" animation="BMAP_ANIMATION_DROP" :icon="{url:icon.url,size:{width:icon.size[0],height:icon.size[1]}}"></bm-marker>
+					<bm-marker @click="is_click(item)" :position="crdFormation(item.psi)" animation="BMAP_ANIMATION_DROP" :icon="{url:(item.type?icon.url:icon.car_plate_url),size:{width:icon.size[0],height:icon.size[1]}}"></bm-marker>
 				</div>
 			</div>
-			<bm-marker @click="this_psi_click(data.position_data)" :position="crdFormation(this_psi)"  animation="BMAP_ANIMATION_DROP" v-if="psiShow"></bm-marker>
+			<bm-marker @click="this_psi_click(data.position_data)" :position="this_psi ? crdFormation(this_psi): ''"  animation="BMAP_ANIMATION_DROP" v-if="psiShow"></bm-marker>
 
-			<bm-info-window :position="crdFormation(camera_psi)" :title="windowTitle" :show="windowShow" @close="infoWindowClose" @open="infoWindowOpen" :autoPan="true">
+			<bm-info-window :position="crdFormation(tsCamera_data.camera_psi)" :title="windowTitle" :show="windowShow" @close="infoWindowClose" @open="infoWindowOpen" :autoPan="true">
 				<div class="cont">
 					<div class="btn_list">
-						<button v-if="(this.camera_psi == this.this_psi)">回看</button>
-						<button>直播</button>
+						<!-- <button v-if="(this.camera_psi == this.this_psi)">回看</button> -->
+						<button @click="open_video()">查看实时画面</button>
 					</div>
 				</div>
 			</bm-info-window>
@@ -43,12 +43,17 @@ export default {
 			psiShow:false,
 			positionList:true,
 			this_psi:'',
+			tsCamera_data:{
+				camera_psi:'',
+				data:{}
+			},
 			camera_psi:'',
 			center: {lng: 121.481977, lat: 31.235682},
 			zoom: 11,
 			icon:{
-				url:require('../assets/camer.png'),
-				size:[32,32],
+				url:require('../assets/people.png'),
+				car_plate_url:require('../assets/car.png'),
+				size:[40,40],
 			},
 			cameraList:[],
 			timerOut:null,
@@ -59,15 +64,19 @@ export default {
 	},
 	watch:{
 		"data.timeDate"() {
-			this.this_psi = ""
 			clearTimeout(this.timerOut)
 			this.timerOut = setTimeout(()=>{
-				this.this_psi = this.data.position_data.camera.psi
-			},1)
+				if (this.this_psi == this.data.position_data.psi) {
+					this.this_psi = ''
+				} else {
+					this.this_psi = this.data.position_data.psi
+				}
+			},0)
 		},
 		"this_psi"(){
 			if (!this.this_psi || this.this_psi == "") {
 				this.psiShow = false
+				this.setSourceCenter()
 			} else {
 				this.psiShow = false
 				this.windowShow = false
@@ -98,27 +107,32 @@ export default {
 	},
 	methods:{
 		infoWindowClose(e) {
+			this.this_psi = ''
 			this.windowShow = false;
 			this.setSourceCenter()
 		},
 		infoWindowOpen(e) {
 			this.windowShow = true
 		},
-		is_click(item,index) {
-			this.camera_psi = item.psi
-			if (this.camera_psi != this.this_psi) {
+		is_click(item) {
+			this.tsCamera_data.camera_psi = item.psi
+			this.tsCamera_data.data = item
+			if (this.tsCamera_data.camera_psi != this.this_psi) {
 				this.windowTitle = item.name
 				this.infoWindowOpen()
 			} else {
-				this.infoWindowClose()
+				// this.infoWindowClose()
 			}
 		},
+		is_click_off() {
+			this.infoWindowClose()
+		},
 		this_psi_click(data) {
-			this.camera_psi = data.camera.psi
-			this.windowTitle = data.camera.name
+			this.tsCamera_data.camera_psi = data.psi
+			this.windowTitle = data.name
 			this.infoWindowOpen()
 		},
-		handler ({BMap, map}) {
+		handler ({BMap, map}) { // 打开地图，设置中心原点数据
 			this.map = map
 			this.BMap = BMap
 			if (this.data.zoom) {
@@ -128,7 +142,7 @@ export default {
 				this.center = this.crdFormation(this.data.center)
 			}
 		},
-		setSourceCenter() {
+		setSourceCenter() {  // 回到中心原点
 			clearTimeout(this.timerOut)
 			this.timerOut = setTimeout(()=>{
 				if (!this.windowShow) {
@@ -153,7 +167,12 @@ export default {
 			}
 			return obj
 		},
-		
+		open_video() {
+			if (this.tsCamera_data.data != {}) {
+				// this.infoWindowClose()
+				this.$parent.open_vlc(this.tsCamera_data.data)
+			}
+		}
 	}
 };
 </script>
