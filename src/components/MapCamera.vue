@@ -12,10 +12,10 @@ data:{
 		<baidu-map class="bm-view" :center="center" :zoom="zoom" @ready="handler"   v-if="viewShow" :map-click="false" :double-click-zoom="false" :pinch-to-zoom="false" :dragging="true">
 			<div  v-if="positionList">
 				<div  v-for="(item,index)  in (data.camera_list ? data.camera_list : [])" :key="index">
-					<bm-marker @click="is_click(item)" :position="crdFormation(item.psi)" animation="BMAP_ANIMATION_DROP" :icon="{url:(item.type?icon.url:icon.car_plate_url),size:{width:icon.size[0],height:icon.size[1]}}"></bm-marker>
+					<bm-marker @click="this_psi_click(item,index)" :position="crdFormation(item.psi)" animation="BMAP_ANIMATION_DROP" :icon="{url:(item.type?icon.url:icon.car_plate_url),size:{width:icon.size[0],height:icon.size[1]}}"></bm-marker>
 				</div>
 			</div>
-			<bm-marker @click="this_psi_click(data.position_data)" :position="this_psi ? crdFormation(this_psi): ''"  animation="BMAP_ANIMATION_DROP" v-if="psiShow"></bm-marker>
+			<!-- <bm-marker @click="this_psi_click(data.position_data)" :position="this_psi ? crdFormation(this_psi): ''"  animation="BMAP_ANIMATION_DROP" v-if="psiShow"></bm-marker> -->
 
 			<bm-info-window :position="crdFormation(tsCamera_data.camera_psi)" :title="windowTitle" :show="windowShow" @close="infoWindowClose" @open="infoWindowOpen" :autoPan="true">
 				<div class="cont">
@@ -58,35 +58,13 @@ export default {
 			cameraList:[],
 			timerOut:null,
 			clientWidth:0,
-			clientHeight:0
-
+			clientHeight:0,
+			rowIndex:0
 		}
 	},
 	watch:{
-		"data.timeDate"() {
-			clearTimeout(this.timerOut)
-			this.timerOut = setTimeout(()=>{
-				if (this.this_psi == this.data.position_data.psi) {
-					this.this_psi = ''
-				} else {
-					this.this_psi = this.data.position_data.psi
-				}
-			},0)
-		},
-		"this_psi"(){
-			if (!this.this_psi || this.this_psi == "") {
-				this.psiShow = false
-				this.setSourceCenter()
-			} else {
-				this.psiShow = false
-				this.windowShow = false
-				clearTimeout(this.timerOut)
-				this.timerOut = setTimeout(()=>{
-					this.psiShow = true
-					this.setSourceCenter()
-				},1)
-
-			}
+		'tsCamera_data.data'() {
+			this.infoWindowClose()
 		}
 	},
 	mounted(){
@@ -107,9 +85,10 @@ export default {
 	},
 	methods:{
 		infoWindowClose(e) {
-			this.this_psi = ''
-			this.windowShow = false;
+			this.windowShow = false
 			this.setSourceCenter()
+			this.$parent.row_tabColor()
+
 		},
 		infoWindowOpen(e) {
 			this.windowShow = true
@@ -120,17 +99,22 @@ export default {
 			if (this.tsCamera_data.camera_psi != this.this_psi) {
 				this.windowTitle = item.name
 				this.infoWindowOpen()
-			} else {
-				// this.infoWindowClose()
 			}
 		},
-		is_click_off() {
-			this.infoWindowClose()
-		},
-		this_psi_click(data) {
-			this.tsCamera_data.camera_psi = data.psi
-			this.windowTitle = data.name
-			this.infoWindowOpen()
+		this_psi_click(data,index) {
+			let that = this
+			that.tsCamera_data.camera_psi = data.psi
+			that.tsCamera_data.data = data
+			that.rowIndex = index
+			setTimeout(()=>{
+				if (!that.windowShow) {
+				that.windowTitle = data.name
+					that.infoWindowOpen()
+					this.$parent.row_tabColor(that.tsCamera_data.data )
+				} else {
+					that.infoWindowClose()
+				}
+			},0)
 		},
 		handler ({BMap, map}) { // 打开地图，设置中心原点数据
 			this.map = map

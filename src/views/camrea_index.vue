@@ -4,7 +4,7 @@
 			<baidu-map  ref="baidu_map" :data='map_data'></baidu-map>
 		</div>
 		<div class="right_tab">
-			<search-list :data='cameraList'></search-list>
+			<search-list ref="search_list" :data='cameraList'></search-list>
 		</div>
 	</div>
 </template>
@@ -63,7 +63,10 @@ export default {
 		tab_select(data) {  // 设置地图当前标点
 			this.map_data.position_data = data
 			this.map_data.timeDate = new Date()
-			this.$refs.baidu_map.infoWindowClose()
+			this.$refs.baidu_map.this_psi_click(data)
+		},
+		row_tabColor(row) {
+			this.$refs.search_list.setCurrent(row)
 		},
 		open_vlc(data) {
 			window.location.href="RealPlayAndPTZDemo:&"+data.id
