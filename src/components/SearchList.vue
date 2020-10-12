@@ -31,8 +31,8 @@
 					<template slot-scope="scope">
 						<div>
 							<!-- <span class="camera_title" :title="scope.row.name">名称:{{scope.row.name}}</span> -->
-							<span class="camera_title" :title="scope.row.name" v-html="'名称：' + fullName(scope.row.name)"></span>
-							<span  :title="scope.row.addr">地址:{{scope.row.addr}}</span>
+							<div class="camera_title" :title="scope.row.name" v-html="'名称:' + filterMark(scope.row.name)"></div>
+							<div  :title="scope.row.addr"  v-html="'地址:' + filterMark(scope.row.addr)"></div>
 						</div>
 					</template>
 				</el-table-column>
@@ -56,17 +56,24 @@ export default {
 	components: {},
 	props:['data'],
 	computed: {
-    	fullName() {
+    	filterMark() {
 			return (name)=>{
 				if (name.indexOf(this.search_input) > -1 && this.search_input != "") {
-					console.log(name)
-					console.log(this.search_input)
-					return '<div style="color:red;">'+ this.search_input + '</div>'
-				}else if (this.search_input == "") {
+					let search_index = name.split(this.search_input)
+					let txt_index = name.indexOf(this.search_input)
+					let out_text = ""
+					if (txt_index == 0 && search_index.length > 1) {
+						return   '<span style="color:red">' + this.search_input + '</span>' + search_index[1]
+					} else if (txt_index > 0  && search_index.length > 1) {
+						return   search_index[0] + '<span style="color:red">' + this.search_input + '</span>' + search_index[1]
+					} else {
+						return  name
+					}
+				}else {
 					return name
 				}
 			}
-		}
+		},
 	},
 	data(){
 		return {
@@ -74,7 +81,8 @@ export default {
 			face_img:require('../assets/people.png'),
 			search_input:'',
 			tableData: [],
-			search_listData:[],
+			search_name_list:[],
+			search_addr_list:[],
 			tab_color:false
 		}
 	},
@@ -106,14 +114,21 @@ export default {
 				this.tableData = this.data
 				return
 			}
-			this.search_listData = []
+			this.search_name_list = []
+			this.search_addr_list = []
+
 			for(let i = 0; i < this.tableData.length; i++){
 				if (this.tableData[i].name.indexOf(this.search_input) > -1) {
 					let obj = this.tableData[i]
-					this.search_listData.push(obj)
+					this.search_name_list.push(obj)
+				}
+				if (this.tableData[i].addr.indexOf(this.search_input) > -1) {
+					let obj = this.tableData[i]
+					this.search_addr_list.push(obj)
 				}
 			}
-			this.tableData = this.search_listData
+			let newArr =  this.search_name_list.concat(this.search_addr_list)
+			this.tableData = this.fuc.deWeight(newArr)
 		}
 	}
 };

@@ -21,19 +21,19 @@ const userData = () => {
 const map_data = () => {
   let psi = [ {
 			"ID":	0,
-			"DeviceName":	"东门摄像头",
+			"DeviceName":	"东门1a摄像头",
       "DeviceAddress":	"新民港路888号","Location":"121.476075,30.992932","CameraType":0,"DeviceAddress":'平阳路1'
 		}, {
 			"ID":	1,
-			"DeviceName":	"西门摄像头",
+			"DeviceName":	"西门摄像b头",
 			"DeviceAddress":	"新民港路188号","Location":"121.477036,30.995386","CameraType":1,"DeviceAddress":'平阳路2'
 		}, {
 			"ID":	2,
-			"DeviceName":	"南门摄像头",
+			"DeviceName":	"南门摄x像头",
 			"DeviceAddress":	"新民港路288号","Location":"121.480971,30.99643","CameraType":1,"DeviceAddress":'平阳路3'
 		}, {
 			"ID":	3,
-			"DeviceName":	"北门摄像头",
+			"DeviceName":	"北x门摄像头",
 			"DeviceAddress":	"新民港路388号","Location":"121.478537,30.993497","CameraType":0,"DeviceAddress":'平阳路4'
 		}
   ]
