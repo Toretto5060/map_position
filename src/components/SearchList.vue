@@ -100,7 +100,6 @@ export default {
 		},
 		open_video(data) {
 			this.$parent.open_vlc(data)
-			console.log(1)
 		},
 		select_row(row, column, event) {
 			this.select_row = 0
@@ -116,14 +115,13 @@ export default {
 			}
 			this.search_name_list = []
 			this.search_addr_list = []
-
-			for(let i = 0; i < this.tableData.length; i++){
-				if (this.tableData[i].name.indexOf(this.search_input) > -1) {
-					let obj = this.tableData[i]
+			for(let i = 0; i < this.data.length; i++){
+				if (this.data[i].name.indexOf(this.search_input) > -1) {
+					let obj = this.data[i]
 					this.search_name_list.push(obj)
 				}
-				if (this.tableData[i].addr.indexOf(this.search_input) > -1) {
-					let obj = this.tableData[i]
+				if (this.data[i].addr.indexOf(this.search_input) > -1) {
+					let obj = this.data[i]
 					this.search_addr_list.push(obj)
 				}
 			}
